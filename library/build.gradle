@@ -2,7 +2,8 @@ apply plugin: 'com.android.library'
 
 apply plugin: 'com.github.dcendents.android-maven'
 
-group = 'com.github.xpf'
+// 替换为自己的 GitHub 账号
+group = 'com.github.xinpengfei520'
 
 android {
     compileSdkVersion 27
