@@ -2,6 +2,8 @@
 
 Android Gesture Lock.
 
+本项目是基于鸿神的博客来实现的，原文链接：[点击此处](https://blog.csdn.net/lmj623565791/article/details/36236113)
+
 ## 1.
 
 in your project build.gradle:
