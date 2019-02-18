@@ -35,12 +35,30 @@ public class GestureDrawLine extends View {
      * 声明起点的 Y 轴坐标
      */
     private int moveY;
-    private Paint mPaint; // 声明画笔
-    private Canvas canvas; // 画布
-    private Bitmap bitmap; // 位图
-    private List<GesturePoint> list; // 装有各个 view 坐标的集合
-    private List<Pair<GesturePoint, GesturePoint>> lineList; // 记录画过的线
-    private Map<String, GesturePoint> autoCheckPointMap; // 自动选中的情况点
+    /**
+     * 声明画笔
+     */
+    private Paint mPaint;
+    /**
+     * 画布
+     */
+    private Canvas mCanvas;
+    /**
+     * 位图
+     */
+    private Bitmap mBitmap;
+    /**
+     * 装有各个 view 坐标的集合
+     */
+    private List<GesturePoint> list;
+    /**
+     * 记录画过的线
+     */
+    private List<Pair<GesturePoint, GesturePoint>> lineList;
+    /**
+     * 自动选中的情况点
+     */
+    private Map<String, GesturePoint> autoCheckPointMap;
     /**
      * 是否允许绘制
      */
@@ -87,12 +105,13 @@ public class GestureDrawLine extends View {
         super(context);
         screenDisplay = AppUtil.getScreenDisplay(context);
         mPaint = new Paint(Paint.DITHER_FLAG); // 创建一个画笔
-        bitmap = Bitmap.createBitmap(screenDisplay[0], screenDisplay[0], Bitmap.Config.ARGB_8888); // 设置位图的宽高
-        canvas = new Canvas();
-        canvas.setBitmap(bitmap);
+        mBitmap = Bitmap.createBitmap(screenDisplay[0], screenDisplay[0], Bitmap.Config.ARGB_8888); // 设置位图的宽高
+        mCanvas = new Canvas();
+        mCanvas.setBitmap(mBitmap);
         mPaint.setStyle(Paint.Style.STROKE); // 设置非填充
-        mPaint.setStrokeWidth(10); // 笔宽5像素
-        mPaint.setColor(Color.rgb(245, 142, 33));// 设置默认连线颜色
+        mPaint.setStrokeWidth(10); // 笔宽 5 像素
+        //mPaint.setColor(Color.rgb(245, 142, 33));// 设置默认连线颜色
+        mPaint.setColor(Color.rgb(94, 186, 134));// 设置默认连线颜色
         mPaint.setAntiAlias(true); // 不显示锯齿
 
         this.list = list;
@@ -132,7 +151,7 @@ public class GestureDrawLine extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         // super.onDraw(canvas);
-        canvas.drawBitmap(bitmap, 0, 0, null);
+        canvas.drawBitmap(mBitmap, 0, 0, null);
     }
 
     @Override
@@ -142,7 +161,8 @@ public class GestureDrawLine extends View {
             return true;
         }
 
-        mPaint.setColor(Color.rgb(245, 142, 33));// 设置默认连线颜色
+        //mPaint.setColor(Color.rgb(245, 142, 33));// 设置默认连线颜色
+        mPaint.setColor(Color.rgb(94, 186, 134));// 设置默认连线颜色
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -154,7 +174,7 @@ public class GestureDrawLine extends View {
                     currentPoint.setPointState(Constants.POINT_STATE_SELECTED);
                     passWordSb.append(currentPoint.getNum());
                 }
-                // canvas.drawPoint(moveX, moveY, mPaint);// 画点
+                // mCanvas.drawPoint(moveX, moveY, mPaint);// 画点
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -177,11 +197,11 @@ public class GestureDrawLine extends View {
                 if (pointAt == null || currentPoint.equals(pointAt) || Constants.POINT_STATE_SELECTED == pointAt.getPointState()) {
                     // 点击移动区域不在圆的区域，或者当前点击的点与当前移动到的点的位置相同，或者当前点击的点处于选中状态
                     // 那么以当前的点中心为起点，以手指移动位置为终点画线
-                    canvas.drawLine(currentPoint.getCenterX(), currentPoint.getCenterY(), event.getX(), event.getY(), mPaint);// 画线
+                    mCanvas.drawLine(currentPoint.getCenterX(), currentPoint.getCenterY(), event.getX(), event.getY(), mPaint);// 画线
                 } else {
                     // 如果当前点击的点与当前移动到的点的位置不同
                     // 那么以前前点的中心为起点，以手移动到的点的位置画线
-                    canvas.drawLine(currentPoint.getCenterX(), currentPoint.getCenterY(), pointAt.getCenterX(), pointAt.getCenterY(), mPaint);// 画线
+                    mCanvas.drawLine(currentPoint.getCenterX(), currentPoint.getCenterY(), pointAt.getCenterX(), pointAt.getCenterY(), mPaint);// 画线
                     pointAt.setPointState(Constants.POINT_STATE_SELECTED);
 
                     // 判断是否中间点需要选中
@@ -313,9 +333,9 @@ public class GestureDrawLine extends View {
      * 清掉屏幕上所有的线，然后画出集合里面的线
      */
     private void clearScreenAndDrawList() {
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         for (Pair<GesturePoint, GesturePoint> pair : lineList) {
-            canvas.drawLine(pair.first.getCenterX(), pair.first.getCenterY(),
+            mCanvas.drawLine(pair.first.getCenterX(), pair.first.getCenterY(),
                     pair.second.getCenterX(), pair.second.getCenterY(), mPaint);// 画线
         }
     }
@@ -324,12 +344,12 @@ public class GestureDrawLine extends View {
      * 校验错误/两次绘制不一致提示
      */
     private void drawErrorPathTip() {
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         mPaint.setColor(Color.rgb(154, 7, 21));// 设置默认线路颜色
         for (Pair<GesturePoint, GesturePoint> pair : lineList) {
             pair.first.setPointState(Constants.POINT_STATE_WRONG);
             pair.second.setPointState(Constants.POINT_STATE_WRONG);
-            canvas.drawLine(pair.first.getCenterX(), pair.first.getCenterY(),
+            mCanvas.drawLine(pair.first.getCenterX(), pair.first.getCenterY(),
                     pair.second.getCenterX(), pair.second.getCenterY(), mPaint);// 画线
         }
 

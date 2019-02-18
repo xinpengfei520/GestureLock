@@ -24,8 +24,8 @@ public class LockIndicator extends View {
      * 列数
      */
     private int numColumn = 3;
-    private int patternWidth = 40;
-    private int patternHeight = 40;
+    private int patternWidth = 60;
+    private int patternHeight = 60;
     private int f = 5;
     private int g = 5;
     private int strokeWidth = 2;
