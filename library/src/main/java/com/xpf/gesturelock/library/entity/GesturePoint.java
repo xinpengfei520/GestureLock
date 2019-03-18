@@ -51,18 +51,15 @@ public class GesturePoint {
      */
     private int num;
 
-    public GesturePoint(int leftX, int rightX, int topY, int bottomY,
-                        ImageView image, int num) {
+    public GesturePoint(int leftX, int rightX, int topY, int bottomY, ImageView image, int num) {
         super();
         this.leftX = leftX;
         this.rightX = rightX;
         this.topY = topY;
         this.bottomY = bottomY;
         this.image = image;
-
         this.centerX = (leftX + rightX) / 2;
         this.centerY = (topY + bottomY) / 2;
-
         this.num = num;
     }
 
@@ -165,26 +162,44 @@ public class GesturePoint {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+
+        if (getClass() != obj.getClass()) {
             return false;
+        }
+
         GesturePoint other = (GesturePoint) obj;
-        if (bottomY != other.bottomY)
+
+        if (bottomY != other.bottomY) {
             return false;
+        }
+
         if (image == null) {
-            if (other.image != null)
+            if (other.image != null) {
                 return false;
-        } else if (!image.equals(other.image))
+            }
+        } else if (!image.equals(other.image)) {
             return false;
-        if (leftX != other.leftX)
+        }
+
+        if (leftX != other.leftX) {
             return false;
-        if (rightX != other.rightX)
+        }
+
+        if (rightX != other.rightX) {
             return false;
-        if (topY != other.topY)
+        }
+
+        if (topY != other.topY) {
             return false;
+        }
+
         return true;
     }
 

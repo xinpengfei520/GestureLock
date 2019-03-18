@@ -54,6 +54,51 @@ public class GestureEditActivity extends Activity implements View.OnClickListene
 
     private SharedPreferences mSharedPreferences = null;
 
+    private GestureDrawLine.GestureCallBack gestureCallBack = new GestureDrawLine.GestureCallBack() {
+        @Override
+        public void onGestureCodeInput(String inputCode) {
+            Log.i(TAG, "onGestureCodeInput()");
+            if (!isInputPassValidate(inputCode)) {
+                mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>最少链接4个点, 请重新输入</font>"));
+                mGestureContentView.clearDrawLineState(0L);
+                return;
+            }
+
+            if (mIsFirstInput) {
+                mFirstPassword = inputCode;
+                updateCodeList(inputCode);
+                mGestureContentView.clearDrawLineState(0L);
+                mTextReset.setClickable(true);
+                mTextReset.setText(getString(R.string.reset_gesture_code));
+            } else {
+                if (inputCode.equals(mFirstPassword)) {
+                    Toast.makeText(GestureEditActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+                    mGestureContentView.clearDrawLineState(0L);
+                    GestureEditActivity.this.finish();
+                } else {
+                    mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>与上一次绘制不一致，请重新绘制</font>"));
+                    // 左右移动动画
+                    Animation shakeAnimation = AnimationUtils.loadAnimation(GestureEditActivity.this, R.anim.shake);
+                    mTextTip.startAnimation(shakeAnimation);
+                    // 保持绘制的线，1.5秒后清除
+                    mGestureContentView.clearDrawLineState(1300L);
+                }
+            }
+
+            mIsFirstInput = false;
+        }
+
+        @Override
+        public void checkedSuccess() {
+            Log.i(TAG, "checkedSuccess()");
+        }
+
+        @Override
+        public void checkedFail() {
+            Log.i(TAG, "checkedFail()");
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,59 +108,22 @@ public class GestureEditActivity extends Activity implements View.OnClickListene
     }
 
     private void setUpViews() {
-        mTextTitle = (TextView) findViewById(R.id.text_title);
-        mTextCancel = (TextView) findViewById(R.id.text_cancel);
-        mTextReset = (TextView) findViewById(R.id.text_reset);
+        mTextTitle = findViewById(R.id.text_title);
+        mTextCancel = findViewById(R.id.text_cancel);
+        mTextReset = findViewById(R.id.text_reset);
         mTextReset.setClickable(false);
-        mLockIndicator = (LockIndicator) findViewById(R.id.lock_indicator);
-        mTextTip = (TextView) findViewById(R.id.text_tip);
-        mGestureContainer = (FrameLayout) findViewById(R.id.gesture_container);
+        mLockIndicator = findViewById(R.id.lock_indicator);
+        mTextTip = findViewById(R.id.text_tip);
+        mGestureContainer = findViewById(R.id.gesture_container);
         mSharedPreferences = this.getSharedPreferences("secret_protect", Context.MODE_PRIVATE);
-        // 初始化一个显示各个点的viewGroup
-        mGestureContentView = new GestureContentView(this, false, "", new GestureDrawLine.GestureCallBack() {
-            @Override
-            public void onGestureCodeInput(String inputCode) {
-                Log.i(TAG, "onGestureCodeInput()");
-                if (!isInputPassValidate(inputCode)) {
-                    mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>最少链接4个点, 请重新输入</font>"));
-                    mGestureContentView.clearDrawLineState(0L);
-                    return;
-                }
 
-                if (mIsFirstInput) {
-                    mFirstPassword = inputCode;
-                    updateCodeList(inputCode);
-                    mGestureContentView.clearDrawLineState(0L);
-                    mTextReset.setClickable(true);
-                    mTextReset.setText(getString(R.string.reset_gesture_code));
-                } else {
-                    if (inputCode.equals(mFirstPassword)) {
-                        Toast.makeText(GestureEditActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
-                        mGestureContentView.clearDrawLineState(0L);
-                        GestureEditActivity.this.finish();
-                    } else {
-                        mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>与上一次绘制不一致，请重新绘制</font>"));
-                        // 左右移动动画
-                        Animation shakeAnimation = AnimationUtils.loadAnimation(GestureEditActivity.this, R.anim.shake);
-                        mTextTip.startAnimation(shakeAnimation);
-                        // 保持绘制的线，1.5秒后清除
-                        mGestureContentView.clearDrawLineState(1300L);
-                    }
-                }
-
-                mIsFirstInput = false;
-            }
-
-            @Override
-            public void checkedSuccess() {
-                Log.i(TAG, "checkedSuccess()");
-            }
-
-            @Override
-            public void checkedFail() {
-                Log.i(TAG, "checkedFail()");
-            }
-        });
+        // 初始化一个显示各个点的 viewGroup
+        mGestureContentView = new GestureContentView.Builder(this)
+                .isVerify(false)
+                .setPassword("")
+                .setBlockWeight(3)
+                .setCallback(gestureCallBack)
+                .build();
 
         // 设置手势解锁显示到哪个布局里面
         mGestureContentView.setParentView(mGestureContainer);
@@ -153,10 +161,6 @@ public class GestureEditActivity extends Activity implements View.OnClickListene
     }
 
     private boolean isInputPassValidate(String inputPassword) {
-        if (TextUtils.isEmpty(inputPassword) || inputPassword.length() < 4) {
-            return false;
-        }
-
-        return true;
+        return !TextUtils.isEmpty(inputPassword) && inputPassword.length() >= 4;
     }
 }

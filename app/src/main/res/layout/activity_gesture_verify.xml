@@ -74,7 +74,8 @@
         android:id="@+id/gesture_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gesture_tip_layout" />
+        android:layout_below="@id/gesture_tip_layout"
+        android:layout_centerHorizontal="true" />
 
     <LinearLayout
         android:layout_width="match_parent"

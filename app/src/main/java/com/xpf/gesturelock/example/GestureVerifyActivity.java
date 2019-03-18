@@ -46,6 +46,31 @@ public class GestureVerifyActivity extends Activity implements View.OnClickListe
     private int mParamIntentCode;
     private SharedPreferences mSharedPreferences;
 
+    private GestureDrawLine.GestureCallBack gestureCallBack = new GestureDrawLine.GestureCallBack() {
+
+        @Override
+        public void onGestureCodeInput(String inputCode) {
+
+        }
+
+        @Override
+        public void checkedSuccess() {
+            mGestureContentView.clearDrawLineState(0L);
+            Toast.makeText(GestureVerifyActivity.this, "密码正确", Toast.LENGTH_SHORT).show();
+            GestureVerifyActivity.this.finish();
+        }
+
+        @Override
+        public void checkedFail() {
+            mGestureContentView.clearDrawLineState(1300L);
+            mTextTip.setVisibility(View.VISIBLE);
+            mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>密码错误</font>"));
+            // 左右移动动画
+            Animation shakeAnimation = AnimationUtils.loadAnimation(GestureVerifyActivity.this, R.anim.shake);
+            mTextTip.startAnimation(shakeAnimation);
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,48 +87,23 @@ public class GestureVerifyActivity extends Activity implements View.OnClickListe
     }
 
     private void setUpViews() {
-        mTopLayout = (RelativeLayout) findViewById(R.id.top_layout);
-        mTextTitle = (TextView) findViewById(R.id.text_title);
-        mTextCancel = (TextView) findViewById(R.id.text_cancel);
-        mImgUserLogo = (ImageView) findViewById(R.id.user_logo);
-        mTextPhoneNumber = (TextView) findViewById(R.id.text_phone_number);
-        mTextTip = (TextView) findViewById(R.id.text_tip);
-        mGestureContainer = (FrameLayout) findViewById(R.id.gesture_container);
-        mTextForget = (TextView) findViewById(R.id.text_forget_gesture);
-        mTextOther = (TextView) findViewById(R.id.text_other_account);
+        mTopLayout = findViewById(R.id.top_layout);
+        mTextTitle = findViewById(R.id.text_title);
+        mTextCancel = findViewById(R.id.text_cancel);
+        mImgUserLogo = findViewById(R.id.user_logo);
+        mTextPhoneNumber = findViewById(R.id.text_phone_number);
+        mTextTip = findViewById(R.id.text_tip);
+        mGestureContainer = findViewById(R.id.gesture_container);
+        mTextForget = findViewById(R.id.text_forget_gesture);
+        mTextOther = findViewById(R.id.text_other_account);
 
         String inputCode = mSharedPreferences.getString("inputCode", "1235789");
         // 初始化一个显示各个点的viewGroup
-        mGestureContentView = new GestureContentView(this, true, inputCode,
-                new GestureDrawLine.GestureCallBack() {
-
-                    @Override
-                    public void onGestureCodeInput(String inputCode) {
-
-                    }
-
-                    @Override
-                    public void checkedSuccess() {
-
-                        mGestureContentView.clearDrawLineState(0L);
-
-                        Toast.makeText(GestureVerifyActivity.this, "密码正确", Toast.LENGTH_SHORT).show();
-
-                        GestureVerifyActivity.this.finish();
-                    }
-
-                    @Override
-                    public void checkedFail() {
-
-                        mGestureContentView.clearDrawLineState(1300L);
-                        mTextTip.setVisibility(View.VISIBLE);
-                        mTextTip.setText(Html.fromHtml("<font color='#c70c1e'>密码错误</font>"));
-
-                        // 左右移动动画
-                        Animation shakeAnimation = AnimationUtils.loadAnimation(GestureVerifyActivity.this, R.anim.shake);
-                        mTextTip.startAnimation(shakeAnimation);
-                    }
-                });
+        mGestureContentView = new GestureContentView.Builder(this)
+                .isVerify(true)
+                .setPassword(inputCode)
+                .setCallback(gestureCallBack)
+                .build();
 
         // 设置手势解锁显示到哪个布局里面
         mGestureContentView.setParentView(mGestureContainer);
@@ -116,15 +116,14 @@ public class GestureVerifyActivity extends Activity implements View.OnClickListe
     }
 
     private String getProtectedMobile(String phoneNumber) {
-
         if (TextUtils.isEmpty(phoneNumber) || phoneNumber.length() < 11) {
             return "";
         }
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(phoneNumber.subSequence(0, 3));
-        builder.append("****");
-        builder.append(phoneNumber.subSequence(7, 11));
+        StringBuilder builder = new StringBuilder()
+                .append(phoneNumber.subSequence(0, 3))
+                .append("****")
+                .append(phoneNumber.subSequence(7, 11));
 
         return builder.toString();
     }
@@ -132,12 +131,10 @@ public class GestureVerifyActivity extends Activity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-
         switch (v.getId()) {
             case R.id.text_cancel:
                 this.finish();
                 break;
-
             default:
                 break;
         }

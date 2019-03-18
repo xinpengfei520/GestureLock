@@ -74,7 +74,6 @@ public class GestureLockView extends View {
         this.mColorFingerUp = colorFingerUp;
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mArrowPath = new Path();
-
     }
 
     @Override
